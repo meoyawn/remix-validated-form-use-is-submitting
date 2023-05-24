@@ -1,5 +1,10 @@
-import type { ActionArgs, V2_MetaFunction } from "@remix-run/cloudflare"
+import type {
+  ActionArgs,
+  TypedResponse,
+  V2_MetaFunction,
+} from "@remix-run/cloudflare"
 import { withZod } from "@remix-validated-form/with-zod"
+import type { ValidationErrorResponseData } from "remix-validated-form"
 import {
   useField,
   useIsSubmitting,
@@ -21,12 +26,14 @@ const submitV = withZod(
   }),
 )
 
-export const action = async ({ request }: ActionArgs) => {
+export const action = async ({
+  request,
+}: ActionArgs): Promise<TypedResponse<ValidationErrorResponseData>> => {
   switch (request.method) {
     case "POST":
       const v = await submitV.validate(await request.formData())
       if (v.error) return validationError(v.error)
-      throw new Error("Not implemented")
+      return validationError({ fieldErrors: { url: "Success" } })
 
     default:
       throw new Error(`${request.method} not supported`)
